@@ -15,7 +15,6 @@ editor_options:
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-install.packages("tidyverse")
 
 ```
 
@@ -25,8 +24,8 @@ install.packages("tidyverse")
 x.a <- rnorm(1000, 1, 10)
 
 # 1.1 Filter OUT extreme values out of two standard deviations
-x.a - mean(x.a) <  2*sd(x.a)
-x.a  - mean(x.a) >  -2*sd(x.a)
+#x.a - mean(x.a) <  2*sd(x.a)
+#x.a  - mean(x.a) >  -2*sd(x.a)
 x.a <- x.a[abs(x.a - mean(x.a)) < 2*sd(x.a)]
 
 # 1.2 Plotting the distribution of the remaining vector x.a
@@ -128,6 +127,8 @@ df2 <- df2[order(df2$a, -df2$b),]
 
 ```
 
+*先按照a排序，負號代表的是降冪排列。
+
 # Practice_01_3_2
 
 * 先將以下三個vectors合併為一個data.frame，並先就出口再入口的比例，由大而小排列後，覆蓋掉原本的data.frame。
@@ -137,6 +138,10 @@ country <- c("CN", "US", "JP", "HK", "KR", "SG", "DE", "MY", "VN", "PH", "TH", "
 import <- c(26.142, 12.008, 7.032, 13.646, 4.589, 5.768, 2.131, 2.802, 3.428, 3.019, 1.976, 1.118, 1.624, 0.449, 0.983, 1.302, 1.027, 0.553, 0.670, 0.455)
 
 export <- c(22.987, 12.204, 11.837, 7.739, 5.381, 4.610, 2.866, 2.784, 2.414, 2.092, 1.839, 1.788, 1.665, 1.409, 1.391, 1.075, 0.974, 0.899, 0.800, 0.728)
+
+df_country<-data.frame(country,import, export)
+df_country<-df_country[order(-df_country$export, -df_country$import),]
+df_country
 
 ```
 
