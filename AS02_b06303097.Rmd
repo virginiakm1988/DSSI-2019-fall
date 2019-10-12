@@ -87,20 +87,15 @@ comments %>%
 ```{r}
 comments %>%
     # you cade should be here
-#    group_by(commentor)%>%
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-
-
-
+    group_by(plink)%>%
+    mutate(cindex = row_number(),ctotal = n())%>%
+    ungroup()%>%
+    group_by(commentor)%>%
+    mutate(avg_order = mean(cindex),tot_comment = n())%>%
+    mutate(sd_order = sd(avg_order))%>%
+    ungroup()%>%
+    filter(tot_comment >= 10)%>%
+    filter(ctotal >= 5)%>%
     # you cade should be here
     slice(1:10)
 
@@ -117,17 +112,18 @@ comments %>%
 ```{r}
 comments %>%
     # you cade should be here
-
+  
+    group_by(commentor,plink)%>%
+    mutate(c2p = max(row_number((tag))))%>%
+    summarize(n = n())%>%
+    summarize(num_post = n_distinct(plink),
+              
+    max_c2p = max(n),
+    min_c2p = min(n),
+    mean_c2p = round(mean(n),digits = 2),
     
-    
-    
-    
-    
-    
-    
-    
-    
-
+    sd_c2p = round(sd(n),digits = 2))%>%
+   arrange(desc(num_post))%>%
     # you cade should be here
     slice(1:30)
 ```

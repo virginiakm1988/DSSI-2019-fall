@@ -443,12 +443,12 @@ summary {
 <h1><span class="header-section-number">1</span> Loading pkgs and options</h1>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" title="1"><span class="co"># add essential pkgs here</span></a>
 <a class="sourceLine" id="cb1-2" title="2"><span class="kw">library</span>(tidyverse)</a></code></pre></div>
-<pre><code>## -- Attaching packages ---------------</code></pre>
+<pre><code>## -- Attaching packages -----------------</code></pre>
 <pre><code>## √ ggplot2 3.2.1     √ purrr   0.3.2
 ## √ tibble  2.1.3     √ dplyr   0.8.3
 ## √ tidyr   1.0.0     √ stringr 1.4.0
 ## √ readr   1.3.1     √ forcats 0.4.0</code></pre>
-<pre><code>## -- Conflicts ------------------------
+<pre><code>## -- Conflicts --------------------------
 ## x dplyr::filter() masks stats::filter()
 ## x dplyr::lag()    masks stats::lag()</code></pre>
 <div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" title="1"><span class="kw">options</span>(<span class="dt">stringsAsFactors =</span> F)</a></code></pre></div>
@@ -551,65 +551,64 @@ summary {
 </ul>
 <div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb14-1" title="1">comments <span class="op">%&gt;%</span></a>
 <a class="sourceLine" id="cb14-2" title="2"><span class="st">    </span><span class="co"># you cade should be here</span></a>
-<a class="sourceLine" id="cb14-3" title="3"><span class="co">#    group_by(commentor)%&gt;%</span></a>
-<a class="sourceLine" id="cb14-4" title="4"></a>
-<a class="sourceLine" id="cb14-5" title="5"><span class="st">    </span></a>
-<a class="sourceLine" id="cb14-6" title="6"><span class="st">    </span></a>
-<a class="sourceLine" id="cb14-7" title="7"><span class="st">    </span></a>
-<a class="sourceLine" id="cb14-8" title="8"><span class="st">    </span></a>
-<a class="sourceLine" id="cb14-9" title="9"><span class="st">    </span></a>
-<a class="sourceLine" id="cb14-10" title="10"><span class="st">    </span></a>
-<a class="sourceLine" id="cb14-11" title="11"><span class="st">    </span></a>
-<a class="sourceLine" id="cb14-12" title="12"><span class="st">    </span></a>
-<a class="sourceLine" id="cb14-13" title="13"><span class="st">    </span></a>
-<a class="sourceLine" id="cb14-14" title="14"></a>
-<a class="sourceLine" id="cb14-15" title="15"><span class="st">    </span><span class="co"># you cade should be here</span></a>
-<a class="sourceLine" id="cb14-16" title="16"><span class="st">    </span><span class="kw">slice</span>(<span class="dv">1</span><span class="op">:</span><span class="dv">10</span>)</a></code></pre></div>
-<pre><code>## # A tibble: 10 x 5
-##    tag   commentor ccontent              ctimestamp   plink                
-##    &lt;chr&gt; &lt;chr&gt;     &lt;chr&gt;                 &lt;chr&gt;        &lt;chr&gt;                
-##  1 &quot;→ &quot;  tarcowang &quot; 人家沒工作十六年都在看書&lt;U+561E&gt;，你看的書~ &quot; 04/12 10:~ https://www.ptt.cc/b~
-##  2 &quot;推 &quot; alex8725  &quot; 這個有意義嗎.......&quot;~ &quot; 04/12 10:~ https://www.ptt.cc/b~
-##  3 &quot;→ &quot;  lovebxcx  &quot; 韓英文實力屌打有新竹腔的柯p&quot;~ &quot; 04/12 10:~ https://www.ptt.cc/b~
-##  4 &quot;推 &quot; want150   &quot; 應該是要罵可悲的垃圾媒體狗報啦&quot;~ &quot; 04/12 10:~ https://www.ptt.cc/b~
-##  5 &quot;→ &quot;  want150   &quot; 韓自己有這樣宣稱嗎&quot; &quot; 04/12 10:~ https://www.ptt.cc/b~
-##  6 &quot;→ &quot;  lovebxcx  &quot; 有啊&quot;               &quot; 04/12 10:~ https://www.ptt.cc/b~
-##  7 &quot;→ &quot;  dai26     &quot; ZZZ…&quot;               &quot; 04/12 10:~ https://www.ptt.cc/b~
-##  8 &quot;→ &quot;  lovebxcx  &quot; 第二張圖&quot;           &quot; 04/12 10:~ https://www.ptt.cc/b~
-##  9 &quot;→ &quot;  lovebxcx  &quot; 大概牛津腔的keep 後面是接原形動~ &quot; 04/12 10:~ https://www.ptt.cc/b~
-## 10 &quot;→ &quot;  lovebxcx  &quot; 新竹腔跟其他地區的英文都不是&quot;~ &quot; 04/12 10:~ https://www.ptt.cc/b~</code></pre>
+<a class="sourceLine" id="cb14-3" title="3"><span class="st">    </span><span class="kw">group_by</span>(plink)<span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb14-4" title="4"><span class="st">    </span><span class="kw">mutate</span>(<span class="dt">cindex =</span> <span class="kw">row_number</span>(),<span class="dt">ctotal =</span> <span class="kw">n</span>())<span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb14-5" title="5"><span class="st">    </span><span class="kw">ungroup</span>()<span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb14-6" title="6"><span class="st">    </span><span class="kw">group_by</span>(commentor)<span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb14-7" title="7"><span class="st">    </span><span class="kw">mutate</span>(<span class="dt">avg_order =</span> <span class="kw">mean</span>(cindex),<span class="dt">tot_comment =</span> <span class="kw">n</span>())<span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb14-8" title="8"><span class="st">    </span><span class="kw">mutate</span>(<span class="dt">sd_order =</span> <span class="kw">sd</span>(avg_order))<span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb14-9" title="9"><span class="st">    </span><span class="kw">ungroup</span>()<span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb14-10" title="10"><span class="st">    </span><span class="kw">filter</span>(tot_comment <span class="op">&gt;=</span><span class="st"> </span><span class="dv">10</span>)<span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb14-11" title="11"><span class="st">    </span><span class="kw">filter</span>(ctotal <span class="op">&gt;=</span><span class="st"> </span><span class="dv">5</span>)<span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb14-12" title="12"><span class="st">    </span><span class="co"># you cade should be here</span></a>
+<a class="sourceLine" id="cb14-13" title="13"><span class="st">    </span><span class="kw">slice</span>(<span class="dv">1</span><span class="op">:</span><span class="dv">10</span>)</a></code></pre></div>
+<pre><code>## # A tibble: 10 x 10
+##    tag   commentor ccontent ctimestamp plink cindex ctotal avg_order
+##    &lt;chr&gt; &lt;chr&gt;     &lt;chr&gt;    &lt;chr&gt;      &lt;chr&gt;  &lt;int&gt;  &lt;int&gt;     &lt;dbl&gt;
+##  1 &quot;→ &quot;  tarcowang &quot; 人家沒工作~ &quot; 04/12 1~ http~      1    103     152. 
+##  2 &quot;推 &quot; alex8725  &quot; 這個有意義~ &quot; 04/12 1~ http~      2    103      55.0
+##  3 &quot;→ &quot;  lovebxcx  &quot; 韓英文實力~ &quot; 04/12 1~ http~      3    103      53.1
+##  4 &quot;推 &quot; want150   &quot; 應該是要罵~ &quot; 04/12 1~ http~      4    103      55.7
+##  5 &quot;→ &quot;  want150   &quot; 韓自己有這~ &quot; 04/12 1~ http~      5    103      55.7
+##  6 &quot;→ &quot;  lovebxcx  &quot; 有啊&quot;  &quot; 04/12 1~ http~      6    103      53.1
+##  7 &quot;→ &quot;  dai26     &quot; ZZZ…&quot;  &quot; 04/12 1~ http~      7    103      66.5
+##  8 &quot;→ &quot;  lovebxcx  &quot; 第二張圖&quot;~ &quot; 04/12 1~ http~      8    103      53.1
+##  9 &quot;→ &quot;  lovebxcx  &quot; 大概牛津腔~ &quot; 04/12 1~ http~      9    103      53.1
+## 10 &quot;→ &quot;  lovebxcx  &quot; 新竹腔跟其~ &quot; 04/12 1~ http~     10    103      53.1
+## # ... with 2 more variables: tot_comment &lt;int&gt;, sd_order &lt;dbl&gt;</code></pre>
 </div>
 <div id="challenge-counting-how-many-posts-each-commentor-has-responded-to" class="section level1">
 <h1><span class="header-section-number">7</span> Challenge: Counting how many posts each commentor has responded to</h1>
 <p>針對每一個回文者，計算出下列數值 1. 一共回過多少則post，一個post多個回文仍只算一次 2. 針對每篇post，最多曾回應一篇post幾次 3. 針對每篇post，最少曾回應一篇post幾次 4. 針對每篇post，平均回應過幾次 5. 針對每篇post，回應次數的標準差</p>
 <div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb16-1" title="1">comments <span class="op">%&gt;%</span></a>
 <a class="sourceLine" id="cb16-2" title="2"><span class="st">    </span><span class="co"># you cade should be here</span></a>
-<a class="sourceLine" id="cb16-3" title="3"></a>
-<a class="sourceLine" id="cb16-4" title="4"><span class="st">    </span></a>
-<a class="sourceLine" id="cb16-5" title="5"><span class="st">    </span></a>
-<a class="sourceLine" id="cb16-6" title="6"><span class="st">    </span></a>
-<a class="sourceLine" id="cb16-7" title="7"><span class="st">    </span></a>
-<a class="sourceLine" id="cb16-8" title="8"><span class="st">    </span></a>
-<a class="sourceLine" id="cb16-9" title="9"><span class="st">    </span></a>
-<a class="sourceLine" id="cb16-10" title="10"><span class="st">    </span></a>
-<a class="sourceLine" id="cb16-11" title="11"><span class="st">    </span></a>
-<a class="sourceLine" id="cb16-12" title="12"><span class="st">    </span></a>
-<a class="sourceLine" id="cb16-13" title="13"></a>
-<a class="sourceLine" id="cb16-14" title="14"><span class="st">    </span><span class="co"># you cade should be here</span></a>
-<a class="sourceLine" id="cb16-15" title="15"><span class="st">    </span><span class="kw">slice</span>(<span class="dv">1</span><span class="op">:</span><span class="dv">30</span>)</a></code></pre></div>
-<pre><code>## # A tibble: 30 x 5
-##    tag   commentor ccontent              ctimestamp   plink                
-##    &lt;chr&gt; &lt;chr&gt;     &lt;chr&gt;                 &lt;chr&gt;        &lt;chr&gt;                
-##  1 &quot;→ &quot;  tarcowang &quot; 人家沒工作十六年都在看書&lt;U+561E&gt;，你看的書~ &quot; 04/12 10:~ https://www.ptt.cc/b~
-##  2 &quot;推 &quot; alex8725  &quot; 這個有意義嗎.......&quot;~ &quot; 04/12 10:~ https://www.ptt.cc/b~
-##  3 &quot;→ &quot;  lovebxcx  &quot; 韓英文實力屌打有新竹腔的柯p&quot;~ &quot; 04/12 10:~ https://www.ptt.cc/b~
-##  4 &quot;推 &quot; want150   &quot; 應該是要罵可悲的垃圾媒體狗報啦&quot;~ &quot; 04/12 10:~ https://www.ptt.cc/b~
-##  5 &quot;→ &quot;  want150   &quot; 韓自己有這樣宣稱嗎&quot; &quot; 04/12 10:~ https://www.ptt.cc/b~
-##  6 &quot;→ &quot;  lovebxcx  &quot; 有啊&quot;               &quot; 04/12 10:~ https://www.ptt.cc/b~
-##  7 &quot;→ &quot;  dai26     &quot; ZZZ…&quot;               &quot; 04/12 10:~ https://www.ptt.cc/b~
-##  8 &quot;→ &quot;  lovebxcx  &quot; 第二張圖&quot;           &quot; 04/12 10:~ https://www.ptt.cc/b~
-##  9 &quot;→ &quot;  lovebxcx  &quot; 大概牛津腔的keep 後面是接原形動~ &quot; 04/12 10:~ https://www.ptt.cc/b~
-## 10 &quot;→ &quot;  lovebxcx  &quot; 新竹腔跟其他地區的英文都不是&quot;~ &quot; 04/12 10:~ https://www.ptt.cc/b~
+<a class="sourceLine" id="cb16-3" title="3"><span class="st">  </span></a>
+<a class="sourceLine" id="cb16-4" title="4"><span class="st">    </span><span class="kw">group_by</span>(commentor,plink)<span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb16-5" title="5"><span class="st">    </span><span class="kw">mutate</span>(<span class="dt">c2p =</span> <span class="kw">max</span>(<span class="kw">row_number</span>((tag))))<span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb16-6" title="6"><span class="st">    </span><span class="kw">summarize</span>(<span class="dt">n =</span> <span class="kw">n</span>())<span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb16-7" title="7"><span class="st">    </span><span class="kw">summarize</span>(<span class="dt">num_post =</span> <span class="kw">n_distinct</span>(plink),</a>
+<a class="sourceLine" id="cb16-8" title="8">              </a>
+<a class="sourceLine" id="cb16-9" title="9">    <span class="dt">max_c2p =</span> <span class="kw">max</span>(n),</a>
+<a class="sourceLine" id="cb16-10" title="10">    <span class="dt">min_c2p =</span> <span class="kw">min</span>(n),</a>
+<a class="sourceLine" id="cb16-11" title="11">    <span class="dt">mean_c2p =</span> <span class="kw">round</span>(<span class="kw">mean</span>(n),<span class="dt">digits =</span> <span class="dv">2</span>),</a>
+<a class="sourceLine" id="cb16-12" title="12">    </a>
+<a class="sourceLine" id="cb16-13" title="13">    <span class="dt">sd_c2p =</span> <span class="kw">round</span>(<span class="kw">sd</span>(n),<span class="dt">digits =</span> <span class="dv">2</span>))<span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb16-14" title="14"><span class="st">   </span><span class="kw">arrange</span>(<span class="kw">desc</span>(num_post))<span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb16-15" title="15"><span class="st">    </span><span class="co"># you cade should be here</span></a>
+<a class="sourceLine" id="cb16-16" title="16"><span class="st">    </span><span class="kw">slice</span>(<span class="dv">1</span><span class="op">:</span><span class="dv">30</span>)</a></code></pre></div>
+<pre><code>## # A tibble: 30 x 6
+##    commentor    num_post max_c2p min_c2p mean_c2p sd_c2p
+##    &lt;chr&gt;           &lt;int&gt;   &lt;int&gt;   &lt;int&gt;    &lt;dbl&gt;  &lt;dbl&gt;
+##  1 aylao            1775      29       1     1.74   2.1 
+##  2 bottger          1569     148       1     3.23   6.16
+##  3 ninaman          1497      87       1     3.5    6.69
+##  4 zeumax           1286     110       1     4.59   7.68
+##  5 gn02118620       1206     128       1     6.1   13.6 
+##  6 bluesunflowe     1197      86       1     3.69   7.34
+##  7 pupu20317        1190     103       1     2.68   5.89
+##  8 formatted        1114      77       1     3.24   6.32
+##  9 alex8725          984      64       1     3.67   5.57
+## 10 c1951             886      38       1     2.28   2.99
 ## # ... with 20 more rows</code></pre>
 </div>
 <div id="call-for-idea" class="section level1">
