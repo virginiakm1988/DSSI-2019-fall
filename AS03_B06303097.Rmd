@@ -1,0 +1,245 @@
+---
+title: "AS03_join_edu_data"
+author: "Virginia"
+date: "9/25/2019"
+output:
+  html_document:
+    highlight: zenburn
+    number_sections: no
+    theme: cerulean
+    toc: yes
+    css: style.css
+editor_options:
+  chunk_output_type: inline
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+library(tidyverse)
+options(stringsAsFactors = F)
+```
+
+# Q1 Joining educational data
+- Reading educational data from the following csv file.
+
+## Reading education data
+```{r}
+education_data <-read_csv("data/opendata107Y020.csv") %>%
+    slice(-1) %>% 
+    glimpse()
+```
+
+
+## Town level educational data 
+- Original data is village-level data
+- Following In-Class tutorial, using `group_by()` to create town-level statistical data.
+
+```{r}
+town_education <- education_data %>%
+  slice(-1) %>%
+  mutate(site_id = str_replace(site_id, "三民一|三民二", "三民區")) %>%
+  mutate(site_id = str_replace(site_id, "鳳山一|鳳山二", "鳳山區")) %>%
+  group_by(site_id) %>%
+  mutate_at(vars(starts_with("edu")),funs(as.numeric(.))) %>%  
+  summarise_if(is.numeric, sum)   
+```
+
+
+## Add code chunks as you need here. 
+
+
+## Loading town-level age, marriage, and referendum data
+- Loading town-level data created in class
+
+```{r}
+
+# Reading CSV
+raw <- read_csv("data/opendata107Y030.csv") %>%
+    slice(-1) %>%
+    mutate(vname  = paste0(site_id, village)) %>%
+    select(statistic_yyy, vname, everything())
+
+# Tidying data
+tidy_data <- raw %>%
+    gather("key", "value", 6:ncol(.)) %>% 
+    mutate(key = str_replace(key, "15down", "0_14")) %>%
+    mutate(key = str_replace(key, "100up", "100_105")) %>%
+    mutate(key = str_replace(key, "single_age", "single")) %>%
+    separate(key, c("married", "ageLower", "ageUpper", "gender")) %>% 
+    mutate(ageLower = as.numeric(ageLower),
+           ageUpper = as.numeric(ageUpper),
+           value = as.numeric(value)
+           ) %>%
+    arrange(vname)
+
+# Summarizing by villages
+village_stat <- tidy_data %>%
+    filter(ageLower >= 20) %>%
+    group_by(district_code) %>%
+    summarise(
+        people = sum(value),
+        elderSum = sum(value[ageLower >= 65]),
+        marriedSum = sum(value[!married %in% ("single")])
+        ) %>%
+    ungroup() %>%
+    mutate(elderPerc = elderSum / people,
+           marriedPerc = marriedSum / people)
+
+# Merging original data fields
+village_stat <- village_stat %>%
+    left_join(raw %>% select(statistic_yyy, district_code, vname, site_id, village), 
+              by = "district_code")
+
+# Stat by towns
+town_stat <- tidy_data %>%
+    filter(ageLower >= 20) %>%
+    mutate(site_id = str_replace(site_id, "三民一|三民二", "三民區")) %>%
+    mutate(site_id = str_replace(site_id, "鳳山一|鳳山二", "鳳山區")) %>%
+    group_by(site_id) %>%
+    summarise(
+        people = sum(value),
+        elderSum = sum(value[ageLower >= 65]),
+        marriedSum = sum(value[!married %in% ("single")])
+        ) %>%
+    ungroup() %>%
+    mutate(elderPerc = elderSum / people,
+           marriedPerc = marriedSum / people)
+
+# Loading referendum data
+ref10 <- read_csv("data/referendum_byTown/ref10.csv")
+
+names(ref10) <- c("refno", "county", "town", "n_agree", "n_disagree", "n_valid", "n_invalid", "n_ticket", "n_people", "perc_ticket", "perc_agree", "perc_disagree", "agree_disagree")
+
+# Cleaning and summarizing
+clean_town_data <- ref10 %>%
+    filter(!is.na(town)) %>%
+    select(refno, county, town, n_agree, n_disagree, n_valid, n_invalid, n_ticket, n_people) %>%
+    mutate(townfull = paste0(county, town)) %>%
+    mutate(perc_ticket = n_ticket / n_people,
+           perc_agree = n_agree / n_ticket,
+           perc_disagree = 1 - perc_agree)
+
+
+```
+
+
+
+## Joining data together
+- Joining all town-leave data together (Including new educational dada, and age, marriage, referendum data introduced in class)
+```{r}
+age_marriage_data <- town_stat %>%
+  mutate(site_id = str_replace_all(site_id, "  ", "")) %>%
+  left_join(clean_town_data, by=c("site_id"="townfull"))
+
+result_data <- age_marriage_data %>%
+  left_join(town_education, by = c("site_id" = "site_id"))
+```
+
+## **Q1 Ans: Joined data dimension**
+- using `dim()` to display data dimension (should be 368). TAs will score Q1 according to the outcome.
+```{r}
+dim(result_data)
+```
+
+
+## **Q1 Ans: glimpse()**
+- Using `glimpse()` to print out data you join below. TAs will score Q1 according to the `glimpse()` outcome.
+```{r}
+glimpse(result_data)
+```
+
+# Q2 Open Question - Joining one more dimension
+- TASK: Collecting one more dimension from open data for town level and join it with the eucation, married, age, and referendum data.
+
+
+## Read the file
+```{r}
+raw_divorce_data <- read_csv("data/opendata10712M060.csv")
+
+```
+
+## Display the data dimension of the file
+```{r}
+dim(raw_divorce_data)
+
+```
+
+## Add code chunks as you need
+
+
+## **Q2 Ans: Answer following questions**
+- Data source link (the page you download the data): 
+- Describe the data source in your words: 
+ans:
+資料來源網址:
+https://data.moi.gov.tw/MoiOD/Data/DataDetail.aspx?oid=4C2D8011-C096-479F-821D-F052805F4083
+
+資料為: 離婚人數按離婚者雙方原屬國籍(地區)分（新增區域代碼）
+依照離婚的人雙方原屬的地區來統計離婚人數，此資料為107年度的資料。
+
+
+```{r}
+tidy_divorce_data <- raw_divorce_data %>%
+  slice(-1) %>%
+  mutate(site_id = str_replace(site_id, "三民一|三民二", "三民區")) %>%
+  mutate(site_id = str_replace(site_id, "鳳山一|鳳山二", "鳳山區")) %>%
+  group_by(site_id) %>%
+  mutate_at(vars(starts_with("divorce")),funs(as.numeric)) %>%
+  summarise_if(is.numeric, sum)
+
+combined_data <- result_data %>%
+  left_join(tidy_divorce_data, by = c("site_id" = "site_id")) 
+
+
+```
+## **Q2 Ans: Dim() of joined data frame**
+
+```{r}
+dim(combined_data)
+```
+
+
+## **Q2 Ans: glimpse() of joined data frame**
+```{r}
+glimpse(combined_data)
+```
+
+# Q3 Open question - Linear regression
+ - Now, you have age, marriage, and education as indenpendent variables and referendum 10th agreement as the dependent variable.
+ - Go online and search how to run regression with R
+ - Report the regression result 
+
+## **Q3 Ans**
+```{r}
+
+# code for print out regression result 
+reg = result_data %>%
+    mutate(mas_doc_grad = edu_doctor_graduated_m + edu_doctor_graduated_f + edu_master_graduated_m + edu_master_graduated_f ) %>%
+    mutate(grad_perc = mas_doc_grad / edu_age_15up_total)%>%mutate(over_college_juniorcollege = edu_doctor_graduated_m +edu_doctor_graduated_f +edu_master_graduated_m +
+           edu_master_graduated_f + edu_university_graduated_m +edu_university_graduated_f + 
+           edu_juniorcollege_2ys_graduated_m +edu_juniorcollege_2ys_graduated_f + edu_juniorcollege_5ys_final2y_graduated_m +
+           edu_juniorcollege_5ys_final2y_graduated_f) %>%
+mutate(advanced_degree_ratio = over_college_juniorcollege / edu_age_15up_total)
+
+
+prediction <-lm(perc_agree ~ advanced_degree_ratio+ elderPerc + marriedPerc + grad_perc, data = reg)
+summary(prediction)
+```
+
+
+
+# Q4 Challenge: The median of grouped data
+- Calculating age median of grouped data
+- Reference: https://www.themathdoctors.org/finding-the-median-of-grouped-data/
+- Solve it wit dplyr pkgs
+- If you can't answer the question correctly, keep your code (even wrong) to get partial scores.
+
+## **Q4 Ans: glimpse()**
+```{r}
+# glimpse(YOUR_DATA_FRAME_NAME)
+```
+
