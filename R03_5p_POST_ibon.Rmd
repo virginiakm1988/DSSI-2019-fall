@@ -1,0 +1,144 @@
+---
+title: "R03_6_POST_ibon"
+author: "Virginia Chen"
+date: "2019/10/20"
+output:
+  html_document:
+    css: style.css
+    highlight: tango
+    number_sections: yes
+    theme: readable
+    toc: yes
+  pdf_document:
+    toc: yes
+editor_options:
+  chunk_output_type: inline
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Crawler design
+1. Finding way to get the first page of data
+2. Finding way to get back all page
+
+
+
+```{r}
+library(tidyverse)
+library(httr) # GET(), POST(), content()
+library(rvest) # read_html(), html_nodes(), html_text()
+options(stringsAsFactors = F)
+```
+
+
+# Getting county
+
+## No pipeline
+
+```{r}
+# The url
+url <- "http://www.ibon.com.tw/retail_inquiry.aspx#gsc.tab=0"
+# browseURL(url)
+
+doc <- read_html(url)
+class(doc)
+
+nodes <- html_nodes(doc, "#Class1 > option")
+length(nodes)
+
+counties <- html_text(nodes)
+counties
+```
+
+## Pipeline
+```{r}
+
+# Writing as pipeline version
+url <- "http://www.ibon.com.tw/retail_inquiry.aspx#gsc.tab=0"
+counties <- read_html(url) %>%
+    html_nodes("#Class1 > option") %>%
+    html_text()
+
+counties
+```
+
+# POST: Getting address of Taipei city
+- Is it possible to use `GET()` to get back Taipei city's ibon address?
+
+## Getting back html with `POST()`
+```{r}
+# Finding the url
+url <- "http://www.ibon.com.tw/retail_inquiry_ajax.aspx"
+
+
+# Using POST to send parameters
+response <- POST(url, body=list(strTargetField="COUNTY", strKeyWords="基隆市"))
+
+
+# httr::content() to convert response to textual data
+print(content(response, "text"))
+
+# cat() to save textual data to html file
+# cat(content(response, "text"))
+cat(content(response, "text"), file="temp_711.html")
+
+# browseURL() to re-open the html in your browser
+browseURL("temp_711.html")
+
+```
+
+## Retrieveing data in nodes
+```{r}
+# Converting response to text by content() and parsing to xml_document by read_html(), assign to var 'doc'
+doc <- response %>%
+    content("text") %>%
+    read_html()
+
+# Selecting nodes
+nodes <- html_nodes(doc, "table tr td:nth-child(3)")
+length(nodes)
+
+# Retrieving text from nodes
+addr <- html_text(nodes) %>% trimws()
+addr
+
+# Using html_table() function
+table_nodes <- html_node(doc, "table")
+# html_table(table_nodes) %>% class()  -> R在windows下的問題，放到mac上面跑是沒問題的...
+
+```
+
+
+
+# Getting and binding all counties' data
+
+```{r}
+all_addr <- c()
+url <- "http://www.ibon.com.tw/retail_inquiry_ajax.aspx"
+
+for(county in counties)
+{
+    response <- POST(url, body=list(strTargetField="COUNTY", strKeyWords = county))
+    addr <- response %>%
+        content("text") %>%
+        read_html() %>%
+        html_nodes("table tr td:nth-child(3)") %>%
+        html_text()
+    all_addr <- c(all_addr, addr)
+    cat(county, "\t", length(addr))
+    
+}
+
+```
+
+
+# Cleaning data
+
+# Retrieving town names 
+```{r}
+
+
+```
+

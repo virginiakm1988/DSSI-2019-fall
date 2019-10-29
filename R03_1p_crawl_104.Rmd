@@ -1,0 +1,178 @@
+---
+title: "R03_1 Crawling 104"
+author: "Jilung Hsieh"
+date: "2019/9/2"
+output:
+  html_document:
+    highlight: zenburn
+    number_sections: yes
+    theme: cerulean
+    toc: yes
+    css: style.css
+editor_options:
+  chunk_output_type: inline
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+# Loading essential packages
+```{r}
+library(tidyverse)
+options(stringsAsFactors = F)
+library(httr)
+library(jsonlite)
+```
+
+
+# Get the first pages
+
+## Must loading the second page
+```{r}
+# Assigning the 2nd page data url to url2
+url2 <- "https://www.104.com.tw/jobs/search/list?ro=0&kwop=7&keyword=%E8%B3%87%E6%96%99%E7%A7%91%E5%AD%B8%E5%AE%B6&order=1&asc=0&page=2&mode=s&jobsource=2018indexpoc"
+
+# Assigning the 3rd page data url to url3
+url3 <- "https://www.104.com.tw/jobs/search/list?ro=0&kwop=7&keyword=%E8%B3%87%E6%96%99%E7%A7%91%E5%AD%B8%E5%AE%B6&order=1&asc=0&page=3&mode=s&jobsource=2018indexpoc"
+
+# Getting back the url2 data, assigning to result2
+res2 <- GET(url2) %>% content("text") %>% fromJSON()
+
+# Tracing variable result2 and finding the data.frame, assigning to df2
+df2 <- res2$data$list
+
+```
+
+## Try to get the first page by modifying url
+```{r}
+# Guessing the 1st page data url to url1
+url1 <- "https://www.104.com.tw/jobs/search/list?ro=0&kwop=7&keyword=%E8%B3%87%E6%96%99%E7%A7%91%E5%AD%B8%E5%AE%B6&order=1&asc=0&page=1&mode=s&jobsource=2018indexpoc"
+
+# Getting back the 1st page data
+res1 <- GET(url1) %>% content("text") %>% fromJSON()
+df1 <- res1$data$list
+
+
+```
+
+
+## Combine two data with the same variables
+
+```{r}
+#all.df <- bind_rows(df1, df2) # will raise error
+# Error in bind_rows_(x, .id) : 
+#   Argument 31 can't be a list containing data frames
+```
+
+## Drop out hierarchical variables
+Preserving numeric or character, dropping list of data.frame by assigning NULL to the variable
+```{r}
+# Drop list and data.frame inside the data.frame
+df1 <- df1 %>% select(-tags, -link)
+df2 <- df2 %>% select(-tags, -link)
+# Re-binding two data.frame df1 and df2
+all.df <- bind_rows(df1, df2)
+
+```
+
+## Dropping hierarchical variables by dplyr way
+```{r}
+
+# Getting the 1st page data and dropping variable tags and link
+# Assigning to df1
+df1 <- res1$data$list %>% select(-tags, -link)
+# Getting the 2nd page data and dropping variable tags and link
+# Assigning to df2
+
+df2 <- res2$data$list %>% select(-tags, -link)
+# binding df1 and df2
+all.df <- bind_rows(df1, df2)
+
+```
+
+
+# Finding out the last page number
+```{r}
+# Tracing the number of pages in result1
+res1$data$totalPage %>% class()
+
+
+# Checking the availability of the last page
+# Examining if the last page data available by re-composing URL with paste0()
+url <- paste0("https://www.104.com.tw/jobs/search/list?ro=0&kwop=7&keyword=%E8%B3%87%E6%96%99%E7%A7%91%E5%AD%B8%E5%AE%B6&order=1&asc=0&page=", res1$data$totalPage, "&mode=s&jobsource=2018indexpoc")
+url
+browseURL(url)
+
+# Getting back and parsing the last page data
+res_last_page <- GET(url) %>% content("text") %>% fromJSON()
+df <- res_last_page$data$list
+
+```
+
+# Using for-loop to get all pages
+```{r}
+
+all.df <- data.frame()
+
+for(i in 1:res1$data$totalPage){
+    
+    url <- paste0("https://www.104.com.tw/jobs/search/list?ro=0&kwop=7&keyword=%E8%B3%87%E6%96%99%E7%A7%91%E5%AD%B8%E5%AE%B6&order=1&asc=0&page=", i, "&mode=s&jobsource=2018indexpoc")
+    print(url)
+    res <- GET(url) %>% content("text") %>% fromJSON()
+    df <- res$data$list %>%
+        select(-tags, -link)
+    
+    all.df <- all.df %>% bind_rows(df)
+    print(nrow(all.df))
+}
+
+
+
+
+```
+
+# combine all data.frame
+```{r}
+
+#  The 1st url of the query
+url1 <- "https://www.104.com.tw/jobs/search/list?ro=0&kwop=7&keyword=%E5%89%8D%E7%AB%AF%E5%B7%A5%E7%A8%8B%E5%B8%AB&order=1&asc=0&page=1&mode=s&jobsource=2018indexpoc"
+
+# Getting back the 1st page data
+res1 <- GET(url1) %>% content("text") %>% fromJSON()
+
+# for-loop to getting back data and joining them
+
+all.df <- data.frame()
+
+for(i in 1:res1$data$totalPage){
+    
+    url <- paste0("https://www.104.com.tw/jobs/search/list?ro=0&kwop=7&keyword=%E5%89%8D%E7%AB%AF%E5%B7%A5%E7%A8%8B%E5%B8%AB&order=1&asc=0&page=", i, "&mode=s&jobsource=2018indexpoc")
+    # print(url)
+    res <- GET(url) %>% content("text") %>% fromJSON()
+    df <- res$data$list %>%
+        select(-tags, -link)
+    
+    all.df <- all.df %>% bind_rows(df)
+    message(i, "\t", nrow(all.df))
+}
+
+save(all.df, file = "job104_front_end_engineer.rda")
+load("job104_front_end_engineer.rda")
+```
+
+
+# NEXT: (In-Class) How to get DCard Relationship forum
+```{r}
+url_dcard <- "https://www.dcard.tw/f/relationship"
+browseURL(url_dcard)
+```
+
+
+
+
+
+
+
+

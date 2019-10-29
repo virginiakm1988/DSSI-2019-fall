@@ -1,0 +1,164 @@
+---
+title: "R03_5_PTT_scraping_cookie"
+author: "Virginia Chen"
+date: "2019/10/20"
+output:
+  html_document:
+    css: style.css
+    highlight: tango
+    number_sections: yes
+    theme: readable
+    toc: yes
+  pdf_document:
+    toc: yes
+editor_options:
+  chunk_output_type: inline
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# loading packages
+```{r}
+library(rvest)
+library(httr)
+library(tidyverse)
+options(stringsAsFactors = F)
+```
+
+# GET() html with cookie
+
+## Testing: GET() directly
+```{r}
+# url
+url <- "https://www.ptt.cc/bbs/HatePolitics/index.html"
+
+# Using read_html(), write_html() and browseURL() to examine the link
+read_html(url) %>% write_html("test.html")
+
+# Browsing the URL by browseURL()
+browseURL("test.html")
+
+```
+
+
+
+## Testing: GET() with cookie
+```{r}
+# GET html with cookie
+url <- "https://www.ptt.cc/bbs/HatePolitics/index.html"
+response <- GET(url, config = set_cookies("over18" = "1"))
+
+# content() %>% read_html() to an xml_document
+response %>%
+    content("text") %>%
+    read_html() %>%
+    write_html("test_with_cookies.html")
+    
+# Examining the url
+browseURL("test_with_cookies.html")
+
+```
+
+## Code: GET() html with cookie
+```{r}
+# the url
+url <- "https://www.ptt.cc/bbs/HatePolitics/index.html"
+
+# GET() with cookie and convert to xml_document by read_html()
+doc <- GET(url, config = set_cookies("over18" = "1")) %>%
+    content("text") %>%
+    read_html()
+
+# write_html() again to final checking
+doc %>% write_html("test_with_cookies.html")
+browseURL("test_with_cookies.html")
+```
+
+
+# Parse html
+
+```{r}
+# GET() all nodes
+nodes <- html_nodes(doc, ".r-ent")
+length(nodes)
+
+# For all nodes, retrieve number of recommendation to var nrec
+nrec <- html_nodes(nodes, ".nrec") %>% html_text()
+nrec
+
+# For all nodes, retrieve title to variable title
+title <- html_nodes(nodes, ".title") %>% html_text(trim=TRUE)
+title
+
+# For all nodes, retrieve link to variable link
+# Remember to paste the prefix link to the link
+# Try to browse it for verification
+pre <- "https://www.ptt.cc"
+link <- html_nodes(nodes, ".title a") %>% html_attr("href") %>%
+    str_c(pre, .)
+link
+
+# For all nodes, retrieve author to variable author
+author <- html_nodes(nodes, ".meta .author") %>% html_text()
+author
+
+
+# Combine all variable as data.frame
+data.frame(nrec=nrec, title=title, author=author)
+
+```
+
+
+
+# Formatting the url
+```{r}
+url <- "https://www.ptt.cc/bbs/HatePolitics/search?page=1&q=%E6%9E%97%E6%98%B6%E4%BD%90"
+# the query -> query
+query <- "林昶佐"
+    
+# the prefixed url -> pre
+pre <- "https://www.ptt.cc"
+
+# the url by pasting the url, page number and the query
+url <- str_c("https://www.ptt.cc/bbs/HatePolitics/search?page=", 1, "&q=", query)
+
+# preview the url
+browseURL(url)
+```
+
+
+# Using for-loop to get back all pages
+```{r}
+# the query
+query = "林昶佐"
+
+# Creating an empty data frame by data_frame()
+post.df <- data.frame()
+
+# for-loop
+for(i in 1:8)
+{
+    url <- str_c("https://www.ptt.cc/bbs/HatePolitics/search?page=", 1, "&q=", query)
+    doc <- GET(url, config = set_cookies("over18" = "1")) %>%
+    content("text") %>%
+    read_html()
+    nrec <- html_nodes(nodes, ".nrec") %>% html_text()
+    title <- html_nodes(nodes, ".title") %>% html_text(trim=TRUE)
+    link <- html_nodes(nodes, ".title a") %>% html_attr("href") %>%
+        str_c(pre, .)
+    author <- html_nodes(nodes, ".meta .author") %>% html_text()
+    page.df <- data.frame(nrec=nrec, title=title, author=author)
+    post.df <- bind_rows(post.df, page.df)
+}
+
+post.df %>% write_rds("post_HatePolitics_lin.rds")
+
+```
+
+
+# NOTES and FURTHER
+Now we detect the last page number manually. You can try to write a function to crawl back all data given a board name and a query. One more thing you need to think by yourself is that you need to detect the last page number automatically. Try to do it!
+
+

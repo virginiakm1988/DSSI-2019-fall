@@ -240,6 +240,10 @@ summary(prediction)
 
 ## **Q4 Ans: glimpse()**
 ```{r}
+#data <- result_data %>% 
+#  mutate(NormYield = elderSum- median(elderSum))   %>%
+#  arrange(NormYield)
 # glimpse(YOUR_DATA_FRAME_NAME)
+
 ```
 
