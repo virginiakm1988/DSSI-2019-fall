@@ -1,6 +1,5 @@
 ---
 title: "AS05"
-output: html_document
 author: "Virginia Chen"
 date: "2019/10/30"
 output:
@@ -47,7 +46,7 @@ all.datas<-data.frame()
 
 You can also embed plots, for example:
 
-```{r pressure}
+```{r newslink}
   for (news_page in 1:3){
     url <- paste0("https://news.cnyes.com/api/v3/news/category/headline?limit=30&startAt=1571414400&endAt=1572364799&page=",news_page)
     res<- GET(url) %>% content("text") %>% fromJSON()
@@ -67,14 +66,14 @@ You can also embed plots, for example:
     rownames(datas) <- NULL
     all.datas<-bind_rows(all.datas,datas)
   }
-all.datas%>%view()
-save(all.news,file="newslink.rda")
+#all.datas%>%view()
+#save(all.news,file="newslink.rda")
 
 
 ```
 
 Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
-```{r pressure}
+```{r news}
 all.news<-data.frame()
 news<-data.frame()
 for (i in 1:length(datas$titles)){
@@ -93,7 +92,7 @@ for (i in 1:length(datas$titles)){
   relative.stocks
   all.news<-bind_rows(all.news,news)
 }
-all.news%>%view()
-save(all.news,file="news.rda")
+#all.news%>%view()
+#save(all.news,file="news.rda")
 
 ```
