@@ -1,0 +1,69 @@
+---
+title: "AS05"
+output: html_document
+author: "Virginia Chen"
+date: "2019/10/20"
+output:
+  html_document:
+    css: style.css
+    highlight: tango
+    number_sections: yes
+    theme: readable
+    toc: yes
+  pdf_document:
+    toc: yes
+editor_options:
+  chunk_output_type: inline
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r pressure, echo=FALSE}
+library(tidyverse)
+library(rvest)
+options(stringsAsFactors = F)
+library(httr)
+options(encoding = "utf8")
+library(RCurl)
+library(XML)
+library(lubridate)
+as_datetime(1572317372)
+library(rjson)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+```{r }
+
+url <- paste0("https://news.cnyes.com/api/v3/news/category/headline?limit=30&startAt=1571414400&endAt=1572364799&page=",1)
+  res<- GET(url) %>% content("text") %>% fromJSON()
+  df<- res$items$data
+  df
+for (i in 2:29){
+  url <- paste0("https://news.cnyes.com/api/v3/news/category/headline?limit=30&startAt=1571414400&endAt=1572364799&page=",i)
+  res<- GET(url) %>% content("text") %>% fromJSON()
+  df.temp <- res$items$data
+  str(df.temp)
+  new <- bind_rows(df,df.temp) 
+  print(i)
+}
+
+class(df)
+length(df)
+res<- GET(url) %>% content("text") %>% fromJSON()
+res%>%view()
+length(res)
+
+length(res$items$data)
+df <- res$items$data
+
+
+nodes <- html_nodes(url, ".theme-list > div > a>div>h3")
+nodes
+length(nodes)
+html <- htmlParse(getURL(url, .encoding = "utf8"), encoding = "utf8")
+texts <- html_text(nodes)
+texts
+```

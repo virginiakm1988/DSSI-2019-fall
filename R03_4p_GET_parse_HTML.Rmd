@@ -49,7 +49,7 @@ class(url)
 # html_nodes() for getting all eligible nodes
 nodes <- html_nodes(doc, "#Class1 > option")
 length(nodes)
-
+nodes
 # Checking the length of nodes you parsed, using length()
 
 # STEP 3. Converting the selected node into text data
